@@ -1,24 +1,67 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
-import { MainLayout } from '@/layouts/MainLayout';
-import { LoadingSpinner } from '@/core/components/loading-spinner';
 import { ErrorBoundary } from '@/core/components/error-boundary';
+import { LoadingSpinner } from '@/core/components/loading-spinner';
+import { MainLayout } from '@/layouts/MainLayout';
 
-const HomePage = lazy(() =>
-  import('@/pages/Home').then((module) => ({ default: module.HomePage }))
+const VehicleListPage = lazy(() =>
+  import('@/pages/VehicleList').then((module) => ({ default: module.VehicleListPage }))
+);
+const VehicleDetailPage = lazy(() =>
+  import('@/pages/VehicleDetail').then((module) => ({ default: module.VehicleDetailPage }))
+);
+const NotFoundPage = lazy(() =>
+  import('@/pages/NotFound').then((module) => ({ default: module.NotFoundPage }))
 );
 
 const routes = createBrowserRouter([
   {
     path: '/',
-    element: <MainLayout />,
-    errorElement: <ErrorBoundary />,
+    element: (
+      <ErrorBoundary>
+        <MainLayout />
+      </ErrorBoundary>
+    ),
     children: [
       {
         index: true,
         element: (
-          <Suspense fallback={<LoadingSpinner />}>
-            <HomePage />
+          <Suspense
+            fallback={
+              <div className="flex h-96 items-center justify-center">
+                <LoadingSpinner />
+              </div>
+            }
+          >
+            <VehicleListPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'vehicle/:id',
+        element: (
+          <Suspense
+            fallback={
+              <div className="flex h-96 items-center justify-center">
+                <LoadingSpinner />
+              </div>
+            }
+          >
+            <VehicleDetailPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '*',
+        element: (
+          <Suspense
+            fallback={
+              <div className="flex h-96 items-center justify-center">
+                <LoadingSpinner />
+              </div>
+            }
+          >
+            <NotFoundPage />
           </Suspense>
         ),
       },

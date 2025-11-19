@@ -1,1 +1,2 @@
-// Domain modules will be exported here
+// Domain modules export
+export {};

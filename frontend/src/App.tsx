@@ -1,21 +1,22 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
-import { routes } from './router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { routes } from '@/router';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
       retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000,
     },
   },
 });
 
-export const App = () => {
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={routes} />
     </QueryClientProvider>
   );
-};
+}
+
+export default App;

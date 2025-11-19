@@ -3,7 +3,6 @@ import axios from 'axios';
 export const apiConfig = {
   baseUrl: import.meta.env.VITE_API_URL,
   version: import.meta.env.VITE_API_VERSION || 'v1',
-  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || '30000', 10),
   get externalUrl() {
     return `${this.baseUrl}/api/${this.version}/external`;
   },
@@ -12,37 +11,19 @@ export const apiConfig = {
   },
 };
 
-export const publicClient = axios.create({
-  baseURL: apiConfig.externalUrl,
-  timeout: apiConfig.timeout,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-export const authenticatedClient = axios.create({
-  baseURL: apiConfig.internalUrl,
-  timeout: apiConfig.timeout,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+export const publicClient = axios.create({ baseURL: apiConfig.externalUrl });
+export const authenticatedClient = axios.create({ baseURL: apiConfig.internalUrl });
 
 authenticatedClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
 authenticatedClient.interceptors.response.use(
-  (response) => response,
+  (res) => res,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token');
-      window.location.href = '/login';
-    }
+    if (error.response?.status === 401) window.location.href = '/login';
     return Promise.reject(error);
   }
 );

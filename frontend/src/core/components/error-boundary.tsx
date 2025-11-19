@@ -1,39 +1,37 @@
-import { useRouteError, isRouteErrorResponse } from 'react-router-dom';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from './button';
 
-export const ErrorBoundary = () => {
-  const error = useRouteError();
+interface Props {
+  children?: ReactNode;
+}
 
-  let errorMessage: string;
-  let errorStatus: number | undefined;
+interface State {
+  hasError: boolean;
+}
 
-  if (isRouteErrorResponse(error)) {
-    errorMessage = error.statusText || error.data?.message || 'Erro desconhecido';
-    errorStatus = error.status;
-  } else if (error instanceof Error) {
-    errorMessage = error.message;
-  } else {
-    errorMessage = 'Erro desconhecido';
+export class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+  };
+
+  public static getDerivedStateFromError(_: Error): State {
+    return { hasError: true };
   }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md space-y-6 text-center">
-        <div className="space-y-2">
-          {errorStatus && <h1 className="text-6xl font-bold text-primary">{errorStatus}</h1>}
-          <h2 className="text-2xl font-semibold text-foreground">Algo deu errado</h2>
-          <p className="text-muted-foreground">{errorMessage}</p>
-        </div>
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Uncaught error:', error, errorInfo);
+  }
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-          <Button onClick={() => (window.location.href = '/')} variant="default">
-            Voltar para Home
-          </Button>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            Recarregar Página
-          </Button>
+  public render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
+          <h1 className="text-2xl font-bold">Algo deu errado</h1>
+          <Button onClick={() => window.location.reload()}>Recarregar</Button>
         </div>
-      </div>
-    </div>
-  );
-};
+      );
+    }
+
+    return this.props.children;
+  }
+}
